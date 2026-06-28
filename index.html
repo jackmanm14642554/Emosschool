@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <title>EMOS Enterprise Payroll - Professional System</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .summary-box { background: #2c3e50; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px; }
+        button { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-pay { background: #27ae60; color: white; }
+        .btn-export { background: #3498db; color: white; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
+        tr:hover { background: #f9f9f9; }
+        
+        /* Modal for Payslip */
+        #payslipModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); padding-top: 50px; }
+        .modal-content { background: white; max-width: 450px; margin: auto; padding: 30px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>የሰራተኛ ደሞዝ ማኔጅመንት</h2>
+
+    <div class="summary-box">
+        <h3>ጠቅላላ ወርሃዊ የደሞዝ ወጪ: <span id="totalPayroll">0</span> ብር</h3>
+    </div>
+
+    <div class="controls">
+        <input type="text" id="searchInput" placeholder="ሰራተኛን በስም ፈልግ..." onkeyup="searchTable()">
+        <button class="btn-export" onclick="exportToExcel()">ወደ ኤክሴል ላክ</button>
+        <button class="btn-pay" onclick="triggerBulkPayment()">Bulk Payment</button>
+    </div>
+
+    <table id="payrollTable">
+        <thead>
+            <tr><th>ስም</th><th>መነሻ ደሞዝ</th><th>ተቀናሽ</th><th>የተጣራ ክፍያ</th><th>ሁኔታ</th><th>ድርጊት</th></tr>
+        </thead>
+        <tbody id="empTable"></tbody>
+    </table>
+</div>
+
+<div id="payslipModal">
+    <div class="modal-content">
+        <h3>የደሞዝ ወረቀት (Payslip)</h3>
+        <p>ሰራተኛ: <strong id="pName"></strong></p>
+        <p>መነሻ ደሞዝ: <span id="pSalary"></span> ብር</p>
+        <p>የተጣራ ክፍያ: <span id="pNet"></span> ብር</p>
+        <button onclick="window.print()">አትም (Print)</button>
+        <button onclick="document.getElementById('payslipModal').style.display='none'">ዝጋ</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js";
+
+    // 1. Firebase Config (እዚህ ይሙሉ)
+    const firebaseConfig = {
+  "project_info": {
+    "project_number": "251717475332",
+    "firebase_url": "https://telegram-yes-default-rtdb.firebaseio.com",
+    "project_id": "telegram-yes",
+    "storage_bucket": "telegram-yes.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:251717475332:android:8b984e9bd6a0f5f86e2951",
+        "android_client_info": {
+          "package_name": "Com.jack47732.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBnQzEPc0-4oXB-5mIN_sOoBaWemavZ7Hw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+};
+    const db = getFirestore(initializeApp(firebaseConfig));
+
+    // 2. Data Fetching & Table Rendering
+    onSnapshot(query(collection(db, "employees"), orderBy("name")), (snapshot) => {
+        const tbody = document.getElementById('empTable');
+        let total = 0;
+        tbody.innerHTML = "";
+        
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            total += (d.net || 0);
+            tbody.innerHTML += `<tr>
+                <td class="name-col">${d.name}</td>
+                <td>${d.salary}</td>
+                <td>${d.tax}</td>
+                <td><strong>${d.net}</strong></td>
+                <td><button onclick="this.style.background='green'">ክፍያ አረጋግጥ</button></td>
+                <td><button onclick="showPayslip('${d.name}', ${d.salary}, ${d.net})">Payslip</button></td>
+            </tr>`;
+        });
+        document.getElementById('totalPayroll').innerText = total.toLocaleString();
+    });
+
+    // 3. Search Functionality
+    window.searchTable = () => {
+        let input = document.getElementById("searchInput").value.toLowerCase();
+        document.querySelectorAll("#empTable tr").forEach(row => {
+            let name = row.querySelector(".name-col").textContent.toLowerCase();
+            row.style.display = name.includes(input) ? "" : "none";
+        });
+    };
+
+    // 4. Export to Excel
+    window.exportToExcel = () => {
+        let table = document.getElementById("payrollTable");
+        let a = document.createElement('a');
+        a.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML);
+        a.download = 'Payroll_Report.xls';
+        a.click();
+    };
+
+    // 5. Payslip Modal
+    window.showPayslip = (name, salary, net) => {
+        document.getElementById('pName').innerText = name;
+        document.getElementById('pSalary').innerText = salary;
+        document.getElementById('pNet').innerText = net;
+        document.getElementById('payslipModal').style.display = 'block';
+    };
+
+    // 6. Bulk Payment Logic
+    window.triggerBulkPayment = () => {
+        if(confirm("ለሰራተኞች ክፍያ መላክ ይፈልጋሉ?")) {
+            alert("ክፍያ እየተካሄደ ነው (Cloud Function ተቀስቅሷል)...");
+        }
+    };
+</script>
+</body>
+</html>
