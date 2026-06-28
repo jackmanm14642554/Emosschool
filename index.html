@@ -1,151 +1,1164 @@
 <!DOCTYPE html>
-<html lang="am">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>EMOS Enterprise Payroll - Professional System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sebli-Tade - Secure Messaging App with Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f0f2f5; padding: 20px; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .summary-box { background: #2c3e50; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
-        .controls { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 6px; }
-        button { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .btn-pay { background: #27ae60; color: white; }
-        .btn-export { background: #3498db; color: white; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #eee; padding: 12px; text-align: left; }
-        tr:hover { background: #f9f9f9; }
-        
-        /* Modal for Payslip */
-        #payslipModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); padding-top: 50px; }
-        .modal-content { background: white; max-width: 450px; margin: auto; padding: 30px; border-radius: 10px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #333;
+        }
+
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        body.dark-theme .container {
+            background: #0f3460;
+        }
+
+        /* Auth Screen */
+        .auth-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .auth-screen.hidden {
+            display: none;
+        }
+
+        .auth-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        body.dark-theme .auth-box {
+            background: #16213e;
+        }
+
+        .auth-box h1 {
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .auth-box p {
+            margin-bottom: 30px;
+            color: #666;
+        }
+
+        body.dark-theme .auth-box p {
+            color: #aaa;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        body.dark-theme .form-group input {
+            background: #0f3460;
+            border-color: #333;
+            color: #e0e0e0;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-auth:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .auth-toggle {
+            margin-top: 20px;
+            color: #666;
+        }
+
+        body.dark-theme .auth-toggle {
+            color: #aaa;
+        }
+
+        .auth-toggle a {
+            color: #667eea;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .error-message {
+            color: #ff4757;
+            margin-top: 10px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .app-screen {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .app-screen.hidden {
+            display: none;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Contacts Panel */
+        .contacts-panel {
+            width: 25%;
+            background: #f5f5f5;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        body.dark-theme .contacts-panel {
+            background: #1a1a2e;
+            border-right: 1px solid #333;
+        }
+
+        .contacts-panel h2 {
+            padding: 15px;
+            font-size: 16px;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-theme .contacts-panel h2 {
+            background: #16213e;
+            border-bottom: 1px solid #333;
+        }
+
+        .contacts-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: #efefef;
+        }
+
+        body.dark-theme .contact-item:hover {
+            background: #16213e;
+        }
+
+        .contact-item.active {
+            background: #e8e8ff;
+            border-left: 4px solid #667eea;
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 12px;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .contact-status {
+            font-size: 12px;
+            color: #999;
+        }
+
+        body.dark-theme .contact-status {
+            color: #888;
+        }
+
+        /* Chat Panel */
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        body.dark-theme .chat-panel {
+            background: #0f3460;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            padding: 15px 20px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        body.dark-theme .chat-header {
+            background: #16213e;
+            border-bottom: 1px solid #333;
+        }
+
+        .chat-header h3 {
+            font-size: 16px;
+        }
+
+        .chat-options {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-status {
+            font-size: 12px;
+            color: #999;
+            margin-right: 10px;
+        }
+
+        .btn-icon {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-icon:hover {
+            transform: scale(1.2);
+        }
+
+        .btn-logout {
+            padding: 8px 12px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-logout:hover {
+            background: #ff3838;
+        }
+
+        /* Messages Container */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+            text-align: center;
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 60%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            word-wrap: break-word;
+        }
+
+        .message.other .message-content {
+            background: #e8e8ff;
+            color: #333;
+            border-bottom-left-radius: 0;
+        }
+
+        body.dark-theme .message.other .message-content {
+            background: #16213e;
+            color: #e0e0e0;
+        }
+
+        .message.own .message-content {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+
+        .message-media {
+            max-width: 300px;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+
+        .message-media img,
+        .message-media video,
+        .message-media audio {
+            width: 100%;
+            border-radius: 10px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        /* Message Input Area */
+        .message-input-area {
+            padding: 15px;
+            background: #f5f5f5;
+            border-top: 1px solid #ddd;
+        }
+
+        body.dark-theme .message-input-area {
+            background: #1a1a2e;
+            border-top: 1px solid #333;
+        }
+
+        .input-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-tool {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        body.dark-theme .btn-tool {
+            background: #16213e;
+        }
+
+        .btn-tool:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            padding: 10px 15px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .message-input:focus {
+            border-color: #667eea;
+        }
+
+        body.dark-theme .message-input {
+            background: #16213e;
+            border-color: #333;
+            color: #e0e0e0;
+        }
+
+        .btn-send {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-theme .modal-content {
+            background: #16213e;
+            color: #e0e0e0;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close:hover {
+            color: #667eea;
+        }
+
+        .btn-primary {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-top: 15px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .upload-progress {
+            margin-top: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            overflow: hidden;
+            height: 5px;
+        }
+
+        body.dark-theme .upload-progress {
+            background: #333;
+        }
+
+        .progress-bar {
+            background: #667eea;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .contacts-panel {
+                width: 100%;
+                height: 25%;
+                border-right: none;
+                border-bottom: 1px solid #ddd;
+            }
+
+            .message-content {
+                max-width: 80%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .auth-box {
+                padding: 25px;
+            }
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Auth Screen -->
+        <div id="authScreen" class="auth-screen">
+            <div class="auth-box">
+                <h1>Sebli-Tade</h1>
+                <p>Secure Messaging App</p>
+                
+                <div id="loginForm">
+                    <h2 style="font-size: 20px; margin-bottom: 20px;">Login</h2>
+                    <div class="form-group">
+                        <label for="loginEmail">Email:</label>
+                        <input type="email" id="loginEmail" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password:</label>
+                        <input type="password" id="loginPassword" placeholder="Enter password">
+                    </div>
+                    <button class="btn-auth" onclick="loginUser()">Login</button>
+                    <div class="auth-toggle">
+                        Don't have an account? <a onclick="showSignup()">Sign Up</a>
+                    </div>
+                    <div id="loginError" class="error-message"></div>
+                </div>
 
-<div class="container">
-    <h2>የሰራተኛ ደሞዝ ማኔጅመንት</h2>
+                <div id="signupForm" style="display: none;">
+                    <h2 style="font-size: 20px; margin-bottom: 20px;">Sign Up</h2>
+                    <div class="form-group">
+                        <label for="signupName">Full Name:</label>
+                        <input type="text" id="signupName" placeholder="Your name">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupEmail">Email:</label>
+                        <input type="email" id="signupEmail" placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="signupPassword">Password:</label>
+                        <input type="password" id="signupPassword" placeholder="Create password">
+                    </div>
+                    <button class="btn-auth" onclick="signupUser()">Sign Up</button>
+                    <div class="auth-toggle">
+                        Already have an account? <a onclick="showLogin()">Login</a>
+                    </div>
+                    <div id="signupError" class="error-message"></div>
+                </div>
+            </div>
+        </div>
 
-    <div class="summary-box">
-        <h3>ጠቅላላ ወርሃዊ የደሞዝ ወጪ: <span id="totalPayroll">0</span> ብር</h3>
+        <!-- App Screen -->
+        <div id="appScreen" class="app-screen hidden">
+            <header class="header">
+                <h1>Sebli-Tade</h1>
+                <p>Secure Video, Audio, Text & Photo Messaging</p>
+            </header>
+
+            <div class="main-content">
+                <!-- Contacts Panel -->
+                <div class="contacts-panel">
+                    <h2>
+                        Contacts
+                        <button class="btn-icon" title="Add Contact" onclick="addNewContact()" style="font-size: 16px;">➕</button>
+                    </h2>
+                    <div class="contacts-list" id="contactsList">
+                        <div class="message-placeholder">
+                            <p>Loading contacts...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="chat-panel">
+                    <!-- Chat Header -->
+                    <div class="chat-header">
+                        <div>
+                            <h3 id="chatTitle">Select a contact</h3>
+                            <span class="user-status" id="contactStatus"></span>
+                        </div>
+                        <div class="chat-options">
+                            <span id="currentUser" style="font-size: 12px; color: #999;"></span>
+                            <button class="btn-logout" onclick="logoutUser()">Logout</button>
+                        </div>
+                    </div>
+
+                    <!-- Messages Container -->
+                    <div class="messages-container" id="messagesContainer">
+                        <div class="message-placeholder">
+                            <p>Select a contact to start messaging</p>
+                        </div>
+                    </div>
+
+                    <!-- Message Input Area -->
+                    <div class="message-input-area">
+                        <div class="input-toolbar">
+                            <button class="btn-tool" onclick="capturePhoto()" title="Send Photo">📸</button>
+                            <button class="btn-tool" onclick="recordAudio()" title="Record Audio">🎙️</button>
+                            <button class="btn-tool" onclick="recordVideo()" title="Record Video">📹</button>
+                            <button class="btn-tool" onclick="showSettings()" title="Settings">⚙️</button>
+                        </div>
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                id="messageInput" 
+                                class="message-input" 
+                                placeholder="Type your message..." 
+                                onkeypress="handleKeyPress(event)"
+                            >
+                            <button class="btn-send" onclick="sendMessage()">Send</button>
+                        </div>
+                        <div id="uploadProgress" class="upload-progress" style="display: none;">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('settingsModal')">&times;</span>
+                <h2>Settings</h2>
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="userStatusSelect">Status:</label>
+                        <select id="userStatusSelect" onchange="updateUserStatus(this.value)">
+                            <option value="Online">Online</option>
+                            <option value="Offline">Offline</option>
+                            <option value="Busy">Busy</option>
+                            <option value="Away">Away</option>
+                        </select>
+                    </div>
+                    <button class="btn-primary" onclick="closeModal('settingsModal')">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Contact Modal -->
+        <div id="addContactModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('addContactModal')">&times;</span>
+                <h2>Add Contact</h2>
+                <div class="form-group">
+                    <label for="contactEmail">Contact Email:</label>
+                    <input type="email" id="contactEmail" placeholder="friend@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="contactName">Contact Name:</label>
+                    <input type="text" id="contactName" placeholder="Friend's name">
+                </div>
+                <button class="btn-primary" onclick="saveNewContact()">Add Contact</button>
+            </div>
+        </div>
+
+        <!-- File Inputs (Hidden) -->
+        <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhotoUpload(event)">
+        <input type="file" id="audioInput" accept="audio/*" style="display:none;" onchange="handleAudioUpload(event)">
+        <input type="file" id="videoInput" accept="video/*" style="display:none;" onchange="handleVideoUpload(event)">
     </div>
 
-    <div class="controls">
-        <input type="text" id="searchInput" placeholder="ሰራተኛን በስም ፈልግ..." onkeyup="searchTable()">
-        <button class="btn-export" onclick="exportToExcel()">ወደ ኤክሴል ላክ</button>
-        <button class="btn-pay" onclick="triggerBulkPayment()">Bulk Payment</button>
-    </div>
+    <script>
+        // Firebase Configuration
 
-    <table id="payrollTable">
-        <thead>
-            <tr><th>ስም</th><th>መነሻ ደሞዝ</th><th>ተቀናሽ</th><th>የተጣራ ክፍያ</th><th>ሁኔታ</th><th>ድርጊት</th></tr>
-        </thead>
-        <tbody id="empTable"></tbody>
-    </table>
-</div>
+        const firebaseConfig = {
+        apiKey: "AQ.Ab8RN6Lh5RGfz0QhK1r-0jUubB7ZlEz_rXCf4YzO7r5zdPK15g",
+        authDomain: "student-regeneration-system.firebaseapp.com",
+        projectId: "student-regeneration-system",
+        storageBucket: "student-regeneration-system.firebasestorage.app",
+        messagingSenderId: "309660267926",
+        appId: "G-HS5R8GND6V"
+    };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
-<div id="payslipModal">
-    <div class="modal-content">
-        <h3>የደሞዝ ወረቀት (Payslip)</h3>
-        <p>ሰራተኛ: <strong id="pName"></strong></p>
-        <p>መነሻ ደሞዝ: <span id="pSalary"></span> ብር</p>
-        <p>የተጣራ ክፍያ: <span id="pNet"></span> ብር</p>
-        <button onclick="window.print()">አትም (Print)</button>
-        <button onclick="document.getElementById('payslipModal').style.display='none'">ዝጋ</button>
-    </div>
-</div>
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+        const storage = firebase.storage();
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js";
+        // Global Variables
+        let currentUser = null;
+        let selectedContact = null;
+        let userEmail = null;
 
-    // 1. Firebase Config (እዚህ ይሙሉ)
-    const firebaseConfig = {
-  "project_info": {
-    "project_number": "251717475332",
-    "firebase_url": "https://telegram-yes-default-rtdb.firebaseio.com",
-    "project_id": "telegram-yes",
-    "storage_bucket": "telegram-yes.firebasestorage.app"
-  },
-  "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:251717475332:android:8b984e9bd6a0f5f86e2951",
-        "android_client_info": {
-          "package_name": "Com.jack47732.com"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBnQzEPc0-4oXB-5mIN_sOoBaWemavZ7Hw"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    }
-  ],
-  "configuration_version": "1"
-};
-    const db = getFirestore(initializeApp(firebaseConfig));
-
-    // 2. Data Fetching & Table Rendering
-    onSnapshot(query(collection(db, "employees"), orderBy("name")), (snapshot) => {
-        const tbody = document.getElementById('empTable');
-        let total = 0;
-        tbody.innerHTML = "";
-        
-        snapshot.forEach(doc => {
-            const d = doc.data();
-            total += (d.net || 0);
-            tbody.innerHTML += `<tr>
-                <td class="name-col">${d.name}</td>
-                <td>${d.salary}</td>
-                <td>${d.tax}</td>
-                <td><strong>${d.net}</strong></td>
-                <td><button onclick="this.style.background='green'">ክፍያ አረጋግጥ</button></td>
-                <td><button onclick="showPayslip('${d.name}', ${d.salary}, ${d.net})">Payslip</button></td>
-            </tr>`;
+        // Initialize Auth
+        auth.onAuthStateChanged(function(user) {
+            if (user) {
+                currentUser = user;
+                userEmail = user.email;
+                document.getElementById('authScreen').classList.add('hidden');
+                document.getElementById('appScreen').classList.remove('hidden');
+                document.getElementById('currentUser').textContent = userEmail;
+                loadContacts();
+                listenForMessages();
+            } else {
+                currentUser = null;
+                document.getElementById('authScreen').classList.remove('hidden');
+                document.getElementById('appScreen').classList.add('hidden');
+            }
         });
-        document.getElementById('totalPayroll').innerText = total.toLocaleString();
-    });
 
-    // 3. Search Functionality
-    window.searchTable = () => {
-        let input = document.getElementById("searchInput").value.toLowerCase();
-        document.querySelectorAll("#empTable tr").forEach(row => {
-            let name = row.querySelector(".name-col").textContent.toLowerCase();
-            row.style.display = name.includes(input) ? "" : "none";
-        });
-    };
-
-    // 4. Export to Excel
-    window.exportToExcel = () => {
-        let table = document.getElementById("payrollTable");
-        let a = document.createElement('a');
-        a.href = 'data:application/vnd.ms-excel,' + encodeURIComponent(table.outerHTML);
-        a.download = 'Payroll_Report.xls';
-        a.click();
-    };
-
-    // 5. Payslip Modal
-    window.showPayslip = (name, salary, net) => {
-        document.getElementById('pName').innerText = name;
-        document.getElementById('pSalary').innerText = salary;
-        document.getElementById('pNet').innerText = net;
-        document.getElementById('payslipModal').style.display = 'block';
-    };
-
-    // 6. Bulk Payment Logic
-    window.triggerBulkPayment = () => {
-        if(confirm("ለሰራተኞች ክፍያ መላክ ይፈልጋሉ?")) {
-            alert("ክፍያ እየተካሄደ ነው (Cloud Function ተቀስቅሷል)...");
+        // Auth Functions
+        function showSignup() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('signupForm').style.display = 'block';
         }
-    };
-</script>
+
+        function showLogin() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('signupForm').style.display = 'none';
+        }
+
+        function loginUser() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                document.getElementById('loginError').textContent = 'Please fill all fields';
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(error => {
+                    document.getElementById('loginError').textContent = error.message;
+                });
+        }
+
+        function signupUser() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            if (!name || !email || !password) {
+                document.getElementById('signupError').textContent = 'Please fill all fields';
+                return;
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .then(userCredential => {
+                    // Save user profile to database
+                    db.ref('users/' + userCredential.user.uid).set({
+                        name: name,
+                        email: email,
+                        status: 'Online',
+                        createdAt: new Date().toISOString()
+                    });
+                })
+                .catch(error => {
+                    document.getElementById('signupError').textContent = error.message;
+                });
+        }
+
+        function logoutUser() {
+            auth.signOut();
+        }
+
+        // Contact Functions
+        function loadContacts() {
+            const contactsList = document.getElementById('contactsList');
+            contactsList.innerHTML = '';
+
+            db.ref('users').on('value', snapshot => {
+                contactsList.innerHTML = '';
+                snapshot.forEach(child => {
+                    const user = child.val();
+                    if (user.email !== userEmail) {
+                        const contactDiv = document.createElement('div');
+                        contactDiv.className = 'contact-item';
+                        contactDiv.onclick = () => selectContact(user.email, user.name, child.key);
+                        contactDiv.innerHTML = `
+                            <div class="contact-avatar">${user.name.charAt(0).toUpperCase()}</div>
+                            <div class="contact-info">
+                                <p class="contact-name">${user.name}</p>
+                                <p class="contact-status">${user.status}</p>
+                            </div>
+                        `;
+                        contactsList.appendChild(contactDiv);
+                    }
+                });
+            });
+        }
+
+        function selectContact(email, name, uid) {
+            selectedContact = { email, name, uid };
+            document.getElementById('chatTitle').textContent = name;
+            document.getElementById('contactStatus').textContent = 'Connected';
+            loadMessages();
+        }
+
+        function addNewContact() {
+            document.getElementById('addContactModal').style.display = 'block';
+        }
+
+        function saveNewContact() {
+            const email = document.getElementById('contactEmail').value;
+            const name = document.getElementById('contactName').value;
+
+            if (!email || !name) {
+                alert('Please fill all fields');
+                return;
+            }
+
+            // Find user by email and add to contacts
+            db.ref('users').orderByChild('email').equalTo(email).once('value', snapshot => {
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        const userId = child.key;
+                        // Add to current user's contacts
+                        db.ref('users/' + currentUser.uid + '/contacts/' + userId).set({
+                            name: name,
+                            email: email
+                        });
+                    });
+                    alert('Contact added successfully!');
+                    document.getElementById('addContactModal').style.display = 'none';
+                    document.getElementById('contactEmail').value = '';
+                    document.getElementById('contactName').value = '';
+                    loadContacts();
+                } else {
+                    alert('User not found');
+                }
+            });
+        }
+
+        // Messaging Functions
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+
+            if (!message || !selectedContact) {
+                alert('Please select a contact and type a message');
+                return;
+            }
+
+            const msgData = {
+                sender: currentUser.uid,
+                senderEmail: userEmail,
+                receiver: selectedContact.uid,
+                text: message,
+                type: 'text',
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+
+            // Create unique chat ID
+            const chatId = [currentUser.uid, selectedContact.uid].sort().join('_');
+
+            db.ref('messages/' + chatId).push(msgData);
+            input.value = '';
+        }
+
+        function loadMessages() {
+            if (!selectedContact) return;
+
+            const chatId = [currentUser.uid, selectedContact.uid].sort().join('_');
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+
+            db.ref('messages/' + chatId).on('value', snapshot => {
+                container.innerHTML = '';
+                if (!snapshot.exists()) {
+                    container.innerHTML = '<div class="message-placeholder"><p>No messages yet. Start the conversation!</p></div>';
+                    return;
+                }
+
+                snapshot.forEach(child => {
+                    const msg = child.val();
+                    displayMessage(msg);
+                });
+
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        function displayMessage(msgObj) {
+            const container = document.getElementById('messagesContainer');
+            const placeholder = container.querySelector('.message-placeholder');
+            if (placeholder) placeholder.remove();
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + (msgObj.sender === currentUser.uid ? 'own' : 'other');
+
+            let content = `<div class="message-content">`;
+
+            if (msgObj.type === 'text') {
+                content += `<p>${escapeHtml(msgObj.text)}</p>`;
+            } else if (msgObj.type === 'photo') {
+                content += `<img src="${msgObj.data}" class="message-media" alt="Photo">`;
+            } else if (msgObj.type === 'audio') {
+                content += `<audio controls class="message-media"><source src="${msgObj.data}"></audio>`;
+            } else if (msgObj.type === 'video') {
+                content += `<video controls class="message-media"><source src="${msgObj.data}"></video>`;
+            }
+
+            content += `<div class="message-time">${formatTime(msgObj.timestamp)}</div>`;
+            content += `</div>`;
+
+            msgDiv.innerHTML = content;
+            container.appendChild(msgDiv);
+        }
+
+        // File Handling Functions
+        function capturePhoto() {
+            document.getElementById('photoInput').click();
+        }
+
+        function recordAudio() {
+            document.getElementById('audioInput').click();
+        }
+
+        function recordVideo() {
+            document.getElementById('videoInput').click();
+        }
+
+        function handlePhotoUpload(event) {
+            uploadMedia(event, 'photo');
+        }
+
+        function handleAudioUpload(event) {
+            uploadMedia(event, 'audio');
+        }
+
+        function handleVideoUpload(event) {
+            uploadMedia(event, 'video');
+        }
+
+        function uploadMedia(event, type) {
+            const file = event.target.files[0];
+            if (!file || !selectedContact) {
+                alert('Please select a contact first');
+                return;
+            }
+
+            const fileName = currentUser.uid + '_' + Date.now() + '_' + file.name;
+            const storageRef = storage.ref('messages/' + type + '/' + fileName);
+            const uploadTask = storageRef.put(file);
+
+            document.getElementById('uploadProgress').style.display = 'block';
+
+            uploadTask.on('state_changed',
+                snapshot => {
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    document.getElementById('progressBar').style.width = progress + '%';
+                },
+                error => {
+                    alert('Upload failed: ' + error.message);
+                    document.getElementById('uploadProgress').style.display = 'none';
+                },
+                () => {
+                    uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+                        const chatId = [currentUser.uid, selectedContact.uid].sort().join('_');
+                        const msgData = {
+                            sender: currentUser.uid,
+                            senderEmail: userEmail,
+                            receiver: selectedContact.uid,
+                            data: downloadURL,
+                            type: type,
+                            timestamp: new Date().toISOString(),
+                            read: false
+                        };
+
+                        db.ref('messages/' + chatId).push(msgData);
+                        document.getElementById('uploadProgress').style.display = 'none';
+                        event.target.value = '';
+                    });
+                }
+            );
+        }
+
+        function listenForMessages() {
+            db.ref('messages').on('child_added', snapshot => {
+                // Real-time message listener
+            });
+        }
+
+        // Settings
+        function showSettings() {
+            document.getElementById('settingsModal').style.display = 'block';
+        }
+
+        function updateUserStatus(status) {
+            db.ref('users/' + currentUser.uid + '/status').set(status);
+        }
+
+        // Utility Functions
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
 </body>
 </html>
