@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Portal - Find Your Dream Job</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #f59e0b;
+            --text-color: #1f2937;
+            --light-bg: #f9fafb;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .navbar .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: var(--transition);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 6rem 2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero-content h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .hero-content p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 1rem 2.5rem;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .cta-button:hover {
+            background-color: #d97706;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        /* Job Sections */
+        .job-section {
+            margin-bottom: 4rem;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .job-section h2 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 2.5rem;
+            font-size: 1.1rem;
+        }
+
+        /* Jobs Grid */
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        /* Job Card */
+        .job-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border-left: 4px solid var(--primary-color);
+            text-align: center;
+        }
+
+        .job-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+            border-left-color: var(--accent-color);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .job-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.8rem;
+            font-size: 1.3rem;
+        }
+
+        .job-card p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .job-link {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .job-link:hover {
+            background-color: var(--secondary-color);
+            transform: translateX(4px);
+        }
+
+        /* About Section */
+        .about-section {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 3rem;
+        }
+
+        .about-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            text-align: center;
+        }
+
+        .about-section p {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 2.5rem;
+            line-height: 1.8;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 1.5rem;
+            background: var(--light-bg);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+
+        .feature:hover {
+            background-color: #e0e7ff;
+        }
+
+        .feature h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .feature p {
+            color: #6b7280;
+        }
+
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+
+            .hero-content p {
+                font-size: 1rem;
+            }
+
+            .job-section h2 {
+                font-size: 1.8rem;
+            }
+
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .about-section {
+                padding: 2rem 1rem;
+            }
+
+            .jobs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .nav-links {
+                gap: 0.5rem;
+            }
+
+            .nav-links a {
+                padding: 0.3rem 0.5rem;
+                font-size: 0.8rem;
+            }
+
+            .hero-content h1 {
+                font-size: 1.5rem;
+            }
+
+            .job-card {
+                padding: 1.5rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="logo">💼 Job Portal</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#ethiopian">Ethiopian Jobs</a></li>
+                <li><a href="#international">International Jobs</a></li>
+                <li><a href="#about">About</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Find Your Dream Job</h1>
+            <p>Explore thousands of job opportunities from Ethiopia and around the world</p>
+            <a href="#ethiopian" class="cta-button">Start Exploring</a>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Ethiopian Job Portals -->
+        <section id="ethiopian" class="job-section">
+            <h2>🇪🇹 Ethiopian Job Portals</h2>
+            <p class="section-subtitle">Discover job opportunities in Ethiopia</p>
+            
+            <div class="jobs-grid">
+                <!-- Job Card 1 -->
+                <div class="job-card">
+                    <div class="card-icon">🏢</div>
+                    <h3>LinkedIn Ethiopia</h3>
+                    <p>Professional networking and job search platform with Ethiopian opportunities</p>
+                    <a href="https://www.linkedin.com/jobs/search/?keywords=jobs&location=Ethiopia" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 2 -->
+                <div class="job-card">
+                    <div class="card-icon">🌐</div>
+                    <h3>Addis Job</h3>
+                    <p>Local Ethiopian job portal featuring positions across various industries</p>
+                    <a href="https://www.addisjob.com" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 3 -->
+                <div class="job-card">
+                    <div class="card-icon">📋</div>
+                    <h3>Yenet Job</h3>
+                    <p>Ethiopian job search engine with listings from major employers</p>
+                    <a href="https://www.yenetjob.com" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 4 -->
+                <div class="job-card">
+                    <div class="card-icon">💻</div>
+                    <h3>Ethiopian Jobs Portal</h3>
+                    <p>Comprehensive job listings for professionals in Ethiopia</p>
+                    <a href="https://www.ethiopianjobsportal.com" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 5 -->
+                <div class="job-card">
+                    <div class="card-icon">🎯</div>
+                    <h3>Jobs.et</h3>
+                    <p>Fast-growing Ethiopian job board with diverse opportunities</p>
+                    <a href="https://www.jobs.et" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 6 -->
+                <div class="job-card">
+                    <div class="card-icon">🚀</div>
+                    <h3>Ethiojobs</h3>
+                    <p>Latest job postings from Ethiopian companies and organizations</p>
+                    <a href="https://ethiojobs.net" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- International Job Portals -->
+        <section id="international" class="job-section">
+            <h2>🌍 International Job Portals</h2>
+            <p class="section-subtitle">Access global employment opportunities</p>
+            
+            <div class="jobs-grid">
+                <!-- Job Card 1 -->
+                <div class="job-card">
+                    <div class="card-icon">💼</div>
+                    <h3>LinkedIn</h3>
+                    <p>World's largest professional network with millions of job listings</p>
+                    <a href="https://www.linkedin.com/jobs/" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 2 -->
+                <div class="job-card">
+                    <div class="card-icon">🔍</div>
+                    <h3>Indeed</h3>
+                    <p>Global job search engine with positions in over 60 countries</p>
+                    <a href="https://www.indeed.com" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 3 -->
+                <div class="job-card">
+                    <div class="card-icon">⭐</div>
+                    <h3>Glassdoor</h3>
+                    <p>Company reviews, salaries, and job listings from employees</p>
+                    <a href="https://www.glassdoor.com" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 4 -->
+                <div class="job-card">
+                    <div class="card-icon">🎯</div>
+                    <h3>Monster</h3>
+                    <p>Major job board with positions across multiple industries worldwide</p>
+                    <a href="https://www.monster.com" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 5 -->
+                <div class="job-card">
+                    <div class="card-icon">🚀</div>
+                    <h3>ZipRecruiter</h3>
+                    <p>AI-powered job matching and application tracking</p>
+                    <a href="https://www.ziprecruiter.com" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 6 -->
+                <div class="job-card">
+                    <div class="card-icon">🏢</div>
+                    <h3>CareerBuilder</h3>
+                    <p>Comprehensive career development and job search platform</p>
+                    <a href="https://www.careerbuilder.com" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 7 -->
+                <div class="job-card">
+                    <div class="card-icon">💎</div>
+                    <h3>FlexJobs</h3>
+                    <p>Curated remote and flexible job opportunities</p>
+                    <a href="https://www.flexjobs.com" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 8 -->
+                <div class="job-card">
+                    <div class="card-icon">🌐</div>
+                    <h3>RemoteOK</h3>
+                    <p>Dedicated platform for remote job opportunities worldwide</p>
+                    <a href="https://remoteok.io" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 9 -->
+                <div class="job-card">
+                    <div class="card-icon">🎨</div>
+                    <h3>Dribbble Jobs</h3>
+                    <p>Creative job board for designers, developers, and creatives</p>
+                    <a href="https://dribbble.com/jobs" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 10 -->
+                <div class="job-card">
+                    <div class="card-icon">💻</div>
+                    <h3>Stack Overflow Jobs</h3>
+                    <p>Tech and developer job listings from leading companies</p>
+                    <a href="https://stackoverflow.com/jobs" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 11 -->
+                <div class="job-card">
+                    <div class="card-icon">🌟</div>
+                    <h3>GitHub Jobs</h3>
+                    <p>Developer and tech positions from innovative companies</p>
+                    <a href="https://github.com/readme/guides/finding-work-on-github" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+
+                <!-- Job Card 12 -->
+                <div class="job-card">
+                    <div class="card-icon">🎓</div>
+                    <h3>AngelList</h3>
+                    <p>Startup jobs and investment opportunities</p>
+                    <a href="https://www.angel.co/jobs" target="_blank" class="job-link">Visit Site →</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <h2>About This Portal</h2>
+            <p>
+                This job portal is designed to help you find employment opportunities both within Ethiopia and internationally. 
+                We've compiled the most popular and reliable job search platforms to make your job hunting journey easier.
+            </p>
+            <div class="features">
+                <div class="feature">
+                    <h3>📱 Easy Access</h3>
+                    <p>All major job portals in one place</p>
+                </div>
+                <div class="feature">
+                    <h3>🌐 Global Coverage</h3>
+                    <p>Ethiopian and international opportunities</p>
+                </div>
+                <div class="feature">
+                    <h3>⚡ Quick Navigation</h3>
+                    <p>Fast and simple to find what you need</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 Job Portal. All rights reserved. | Helping you find your dream job</p>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add active state to navigation links based on scroll position
+        window.addEventListener('scroll', () => {
+            let current = '';
+            
+            const sections = document.querySelectorAll('section[id]');
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').slice(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Animate job cards on page load
+        window.addEventListener('load', () => {
+            const cards = document.querySelectorAll('.job-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.animation = `fadeInUp 0.6s ease ${index * 0.1}s forwards`;
+            });
+        });
+
+        // Add search functionality
+        function searchJobs(query) {
+            const cards = document.querySelectorAll('.job-card');
+            const lowerQuery = query.toLowerCase();
+            
+            cards.forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const description = card.querySelector('p').textContent.toLowerCase();
+                
+                if (title.includes(lowerQuery) || description.includes(lowerQuery)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        // Log message on page load
+        console.log('Welcome to Job Portal! 💼');
+        console.log('Find your dream job from Ethiopian and international job portals all in one place.');
+    </script>
+</body>
+</html>
