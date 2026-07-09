@@ -1,2 +1,2 @@
-# ethiomodern-s-and-d
+emosschool
 Accessing and managing student register and mark list
